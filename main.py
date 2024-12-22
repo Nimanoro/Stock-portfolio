@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import numpy as np
-from montecarlo import simulate_random_returns, simulate_portfolio_growth, monte_carlo_simulation, plot_monte_carlo, summarize_simulation
+from montecarlo import simulate_random_returns, simulate_portfolio_growth, monte_carlo_simulation, plot_monte_carlo, summarize_simulation, monte_carlo_simulation_scenario
 from scipy.optimize import minimize
 # Convert stock tickers input to a list of uppercase tickers
 def convert_input_to_tickers(input_str):
@@ -206,7 +206,7 @@ def run_streamlit_app():
 
 
     elif page == "Monte Carlo Simulation":
-        st.header("Monte Carlo Simulation")
+        st.header("Monte Carlo Simulation with Scenario Analysis")
 
         # Sidebar inputs
         tickers_input = st.sidebar.text_input("Stock Tickers (space-separated):")
@@ -215,6 +215,24 @@ def run_streamlit_app():
         simulation_years = st.sidebar.number_input("Years to Simulate:", min_value=1, value=5)
         iterations = st.sidebar.number_input("Number of Iterations:", min_value=100, value=1000)
 
+        # Scenario selection
+        st.sidebar.header("Scenario Analysis")
+
+        scenarios = {
+            "Bull Market": {"mean": 0.0005, "std": 0.01},  # Higher returns, lower volatility
+            "Bear Market": {"mean": -0.0003, "std": 0.02},  # Negative returns, higher volatility
+            "Stagnant Market": {"mean": 0.0001, "std": 0.005},  # Neutral returns, low volatility
+        }
+
+        scenario = st.sidebar.selectbox("Select Scenario", list(scenarios.keys()) + ["Custom"])
+
+        if scenario == "Custom":
+            custom_mean = st.sidebar.number_input("Custom Mean (daily return)", value=0.0001, step=0.0001)
+            custom_std = st.sidebar.number_input("Custom Std Dev (daily volatility)", value=0.01, step=0.001)
+        else:
+            selected_scenario = scenarios[scenario]
+            custom_mean, custom_std = selected_scenario["mean"], selected_scenario["std"]
+
         if st.sidebar.button("Run Simulation"):
             tickers = convert_input_to_tickers(tickers_input)
 
@@ -222,22 +240,28 @@ def run_streamlit_app():
                 st.error("Please input valid stock tickers.")
                 return
 
-            # Calculate historical data range
+            # Fetch historical data for validation
             end_date = pd.Timestamp.today()
             start_date = end_date - pd.DateOffset(years=years_of_history)
-
             data = get_data(tickers, start_date, end_date)
 
             if data is not None:
-                historical_returns = data['Adj Close'].pct_change().dropna()
-                simulated_growth = monte_carlo_simulation(historical_returns, initial_investment, simulation_years, iterations)
+                # Run the scenario-based Monte Carlo simulation
+                simulated_growth = monte_carlo_simulation_scenario(
+                    initial_value=initial_investment,
+                    years=simulation_years,
+                    iterations=iterations,
+                    mean=custom_mean,
+                    std=custom_std
+                )
 
                 # Display simulation results
-                st.write("## Monte Carlo Simulation Results")
+                st.write(f"## Monte Carlo Simulation Results ({scenario})")
                 plot_monte_carlo(simulated_growth)
                 summary = summarize_simulation(simulated_growth)
                 st.write("### Simulation Summary")
                 st.json(summary)
+
 
 if __name__ == "__main__":
     run_streamlit_app()

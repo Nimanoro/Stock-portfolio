@@ -41,3 +41,9 @@ def summarize_simulation(simulated_growth):
         "90th Percentile": np.percentile(final_values, 90)
     }
     return summary
+
+def monte_carlo_simulation_scenario(initial_value, years, iterations, mean, std):
+    """Monte Carlo simulation with predefined or custom scenarios."""
+    days = years * 252  # Approx. trading days in a year
+    simulated_returns = simulate_random_returns(mean, std, days, iterations)
+    return simulate_portfolio_growth(initial_value, simulated_returns)
