@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import streamlit as st
 import numpy as np
-from montecarlo import simulate_random_returns, simulate_portfolio_growth, monte_carlo_simulation, plot_monte_carlo, summarize_simulation, monte_carlo_simulation_scenario
+from montecarlo import plot_all_scenarios, plot_monte_carlo, summarize_simulation, monte_carlo_simulation_scenario
 from scipy.optimize import minimize
 # Convert stock tickers input to a list of uppercase tickers
 def convert_input_to_tickers(input_str):
@@ -34,8 +34,8 @@ def get_data(tickers, start_date, end_date):
 # Plot adjusted close prices
 def plot_data(data):
     fig, ax = plt.subplots(figsize=(10, 7))
-    for column in data['Adj Close']:
-        ax.plot(data['Adj Close'][column], label=column)
+    for column in data['Close']:
+        ax.plot(data['Close'][column], label=column)
     ax.set_title('Adjusted Close Price', fontsize=16)
     ax.set_xlabel('Date', fontsize=14)
     ax.set_ylabel('Price', fontsize=14)
@@ -44,13 +44,13 @@ def plot_data(data):
 
 # Calculate portfolio value over time
 def calculate_portfolio_value(data, weights, initial_investment):
-    adj_close = data['Adj Close']
+    adj_close = data['Close']
     normalized_prices = adj_close / adj_close.iloc[0]  # Normalize to the first day's price
     portfolio_value = normalized_prices.dot(weights) * initial_investment
     return portfolio_value
 
 def optimize_portfolio(data, initial_investment):
-    returns = data['Adj Close'].pct_change().dropna()
+    returns = data['Close'].pct_change().dropna()
     mean_returns = returns.mean()
     corr_matrix = returns.corr()
     if (corr_matrix > 0.99).sum().sum() > len(corr_matrix):
@@ -122,7 +122,7 @@ def summarize_simulation(simulated_growth):
 def plot_correlation_heatmap(data):
     """Plot correlation heatmap."""
     try:
-        adj_close = data['Adj Close']
+        adj_close = data['Close']
         if adj_close.shape[1] < 2:
             st.error("Correlation heatmap requires at least two stocks.")
             return
@@ -257,7 +257,9 @@ def run_streamlit_app():
 
                 # Display simulation results
                 st.write(f"## Monte Carlo Simulation Results ({scenario})")
-                plot_monte_carlo(simulated_growth)
+                st.pyplot(plot_monte_carlo(simulated_growth))
+                st.write("### Portfolio Growth Trajectories")
+                st.pyplot(plot_all_scenarios(simulated_growth))
                 summary = summarize_simulation(simulated_growth)
                 st.write("### Simulation Summary")
                 st.json(summary)

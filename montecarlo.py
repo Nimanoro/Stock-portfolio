@@ -31,7 +31,7 @@ def plot_monte_carlo(simulated_growth):
     ax.set_xlabel("Days", fontsize=14)
     ax.set_ylabel("Portfolio Value", fontsize=14)
     ax.legend()
-    plt.show()
+    return fig
 
 def summarize_simulation(simulated_growth):
     final_values = simulated_growth[:, -1]
@@ -47,3 +47,20 @@ def monte_carlo_simulation_scenario(initial_value, years, iterations, mean, std)
     days = years * 252  # Approx. trading days in a year
     simulated_returns = simulate_random_returns(mean, std, days, iterations)
     return simulate_portfolio_growth(initial_value, simulated_returns)
+
+
+def plot_all_scenarios(scenarios):
+    fig, ax = plt.subplots(figsize=(10, 7))
+    med = np.median(scenarios, axis=0)
+    mean = np.mean(scenarios, axis=0)
+    max = np.max(scenarios, axis=0)
+    min = np.min(scenarios, axis=0)
+    ax.plot(med, color='blue', label='Median')
+    ax.plot(mean, color='green', label='Mean')
+    ax.plot(max, color='red', label='Max')
+    ax.plot(min, color='purple', label='Min')
+    ax.set_title("Monte Carlo Simulation", fontsize=16)
+    ax.set_xlabel("Days", fontsize=14)
+    ax.set_ylabel("Portfolio Value", fontsize=14)
+    ax.legend()
+    return fig
