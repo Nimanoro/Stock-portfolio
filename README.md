@@ -132,7 +132,7 @@ This project is a **Stock Portfolio Management Tool** designed for portfolio bac
 
 ---
 ## Images from the project 
-![Portfolio Metrics Dashboard](stock-portfolio.png)
+![Portfolio Metrics Dashboard](Stock-portfolio.png)
 ![Portfolio analyzer](stock-portfolio2.png)
 
 
