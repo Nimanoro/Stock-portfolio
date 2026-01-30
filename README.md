@@ -131,6 +131,11 @@ This project is a **Stock Portfolio Management Tool** designed for portfolio bac
 - Exportable reports for analysis.
 
 ---
+## Images from the project 
+![Portfolio Metrics Dashboard](stock-portfolio.png)
+![Portfolio analyzer](stock-portfolio2.png)
+
+
 
 ## License
 This project is licensed under the MIT License. See `LICENSE` for details.
